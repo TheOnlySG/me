@@ -1200,6 +1200,10 @@ body.intro-active .intro {
   align-items: start;
 }
 
+.entry:last-child {
+  border-bottom: 0;
+}
+
 .entry-logo {
   grid-row: 1 / -1;
   width: 9rem;
@@ -1435,6 +1439,10 @@ body.intro-active .intro {
   border-bottom: 1px solid var(--rule);
 }
 
+.awards li:last-child {
+  border-bottom: 0;
+}
+
 .award-year {
   padding-top: 0.25rem;
   font-family: var(--mono);
@@ -1469,6 +1477,10 @@ body.intro-active .intro {
   gap: clamp(1rem, 3vw, 2.5rem);
   padding: 1.15rem 0;
   border-bottom: 1px solid var(--rule);
+}
+
+.skills > div:last-child {
+  border-bottom: 0;
 }
 
 .skills dt {
@@ -1630,6 +1642,12 @@ body.intro-active .intro {
       var(--row-pad) 0 0 var(--hover-bg);
   }
 
+  .entry:last-child:hover,
+  .awards li:last-child:hover,
+  .skills > div:last-child:hover {
+    border-bottom-color: transparent;
+  }
+
   .role:hover {
     background-color: var(--hover-bg);
     box-shadow:
@@ -1698,8 +1716,9 @@ body.intro-active .intro {
 
 .footer {
   padding: clamp(2rem, 4vw, 3rem) var(--gutter);
-  background: var(--ink);
-  color: var(--paper);
+  background: var(--paper);
+  color: var(--muted);
+  border-top: 1px solid var(--rule);
 }
 
 .footer-row {
@@ -1713,16 +1732,24 @@ body.intro-active .intro {
   font-size: 0.62rem;
   letter-spacing: 0.1em;
   text-transform: uppercase;
+  color: var(--muted);
 }
 
 .footer-row a {
-  border-bottom: 1px solid rgba(244, 240, 231, 0.35);
+  border-bottom: 1px solid var(--rule);
+  color: var(--muted);
+  transition: color 0.2s ease, border-color 0.2s ease;
+}
+
+.footer-row a:hover {
+  color: var(--ink);
+  border-color: var(--ink);
 }
 
 .footer-row span {
   display: inline-block;
   margin-left: 0.3rem;
-  color: #c98b78;
+  color: var(--accent);
   transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
@@ -1734,12 +1761,12 @@ body.intro-active .intro {
   max-width: calc(var(--measure) - var(--gutter) - var(--gutter));
   margin: 1.5rem auto 0;
   padding-top: 1rem;
-  border-top: 1px solid rgba(244, 240, 231, 0.18);
+  border-top: 1px solid var(--rule-soft);
   font-family: var(--mono);
   font-size: 0.58rem;
   line-height: 1.7;
   letter-spacing: 0.06em;
-  color: rgba(244, 240, 231, 0.55);
+  color: var(--muted);
 }
 
 @media (max-width: 900px) {
