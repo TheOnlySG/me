@@ -101,8 +101,7 @@ const revealGroups = [
   [".portrait, .about-copy", 110],
   [".facts > div", 80],
   [".entry", 65],
-  [".record-body", 0],
-  [".awards li", 70],
+  [".achievement-sub", 0],
   [".skills > div", 55],
   [".contact-lede, .email, .contact-actions", 90],
   [".footer-row, .colophon", 80],
@@ -138,40 +137,36 @@ const prepareReveals = () => {
     });
   });
 
-  const count = document.querySelector(".count");
-  if (count) {
-    count.textContent = "0";
-  }
+  const counts = document.querySelectorAll(".count");
+  counts.forEach((c) => {
+    c.textContent = "0";
+  });
 };
 
-const countUp = () => {
-  if (countStarted) {
-    return;
-  }
-
-  countStarted = true;
-  const count = document.querySelector(".count");
-  if (!count) {
-    return;
-  }
-
-  const target = Number(count.dataset.count) || 0;
+const animateCount = (el) => {
+  if (!el || el.dataset.counted) return;
+  el.dataset.counted = "true";
+  const target = Number(el.dataset.count) || 0;
   const duration = 1300;
   const start = performance.now();
 
   const tick = (now) => {
     const progress = Math.min((now - start) / duration, 1);
     const eased = 1 - Math.pow(1 - progress, 4);
-    count.textContent = String(Math.round(target * eased));
+    el.textContent = String(Math.round(target * eased));
 
     if (progress < 1) {
       window.requestAnimationFrame(tick);
     } else {
-      count.textContent = String(target);
+      el.textContent = String(target);
     }
   };
 
   window.requestAnimationFrame(tick);
+};
+
+const countUp = () => {
+  document.querySelectorAll(".count").forEach((el) => animateCount(el));
 };
 
 const startHeroCount = () => {
@@ -270,8 +265,9 @@ const activateReveals = () => {
           }
         }
 
-        if (element.classList.contains("record-body")) {
-          countUp();
+        if (element.classList.contains("record-body") || element.classList.contains("achievement-sub")) {
+          const counts = element.querySelectorAll(".count");
+          counts.forEach((c) => animateCount(c));
         }
 
         revealObserver.unobserve(element);
