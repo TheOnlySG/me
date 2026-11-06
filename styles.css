@@ -1093,13 +1093,14 @@ body.intro-active .intro {
 
 .about-grid {
   display: grid;
-  grid-template-columns: 13rem minmax(0, 1fr);
+  grid-template-columns: clamp(16rem, 24vw, 22rem) minmax(0, 1fr);
   gap: clamp(2rem, 6vw, 5rem);
   align-items: start;
 }
 
 .portrait {
-  max-width: 13rem;
+  max-width: clamp(16rem, 24vw, 22rem);
+  width: 100%;
 }
 
 .portrait img {
@@ -1341,7 +1342,13 @@ body.intro-active .intro {
 }
 
 .achievement-sub {
+  position: relative;
   margin-top: clamp(2.5rem, 5vw, 4.5rem);
+  min-height: clamp(240px, 32vw, 360px);
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+  border-radius: 4px;
 }
 
 .achievement-sub:first-of-type {
@@ -1349,21 +1356,29 @@ body.intro-active .intro {
 }
 
 .achievement-sub + .achievement-sub {
-  padding-top: clamp(2.5rem, 5vw, 4.5rem);
+  margin-top: clamp(2.5rem, 5vw, 4.5rem);
+  padding-top: 0;
   border-top: 1px solid var(--rule);
 }
 
 .record-body {
+  position: relative;
+  z-index: 2;
+  width: 100%;
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  grid-template-columns: auto minmax(0, 1fr);
   gap: clamp(1.5rem, 4vw, 4rem);
-  align-items: end;
-  padding-top: 1.5rem;
+  align-items: center;
+  padding: clamp(1.5rem, 4vw, 3rem);
+  background: rgba(246, 244, 238, 0.88);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
   border-top: 1px solid var(--ink);
+  border-bottom: 1px solid var(--rule);
 }
 
 .record-number {
-  font-size: clamp(5rem, 13vw, 11rem);
+  font-size: clamp(4.5rem, 11vw, 9.5rem);
   font-weight: 500;
   line-height: 0.78;
   letter-spacing: -0.06em;
@@ -1464,66 +1479,67 @@ body.intro-active .intro {
   line-height: 1.5;
 }
 
-/* Continuous Carousel (Left to Right Marquee) */
+/* Continuous Carousel (Left to Right Marquee, background layer) */
 .carousel {
-  position: relative;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
   width: 100%;
+  height: 100%;
   overflow: hidden;
-  margin-top: clamp(1.5rem, 3vw, 2.5rem);
-  padding: 1rem 0;
-  -webkit-mask-image: linear-gradient(to right, transparent, black 8%, black 92%, transparent);
-  mask-image: linear-gradient(to right, transparent, black 8%, black 92%, transparent);
+  margin: 0;
+  padding: 0;
+  z-index: 1;
+  pointer-events: auto;
 }
 
 .carousel-track {
   display: flex;
   width: max-content;
-  animation: scroll-ltr 28s linear infinite;
+  height: 100%;
+  animation: scroll-ltr 32s linear infinite;
   will-change: transform;
 }
 
-.carousel:hover .carousel-track {
+.achievement-sub:hover .carousel-track {
   animation-play-state: paused;
 }
 
 .carousel-group {
   display: flex;
-  align-items: center;
-  gap: clamp(1rem, 2vw, 1.8rem);
-  padding-right: clamp(1rem, 2vw, 1.8rem);
+  align-items: stretch;
+  gap: 0;
+  margin: 0;
+  padding: 0;
   flex-shrink: 0;
+  height: 100%;
 }
 
 .carousel-item {
   flex-shrink: 0;
-  width: clamp(220px, 28vw, 320px);
-  height: clamp(150px, 19vw, 210px);
-  border-radius: 6px;
+  width: clamp(240px, 30vw, 360px);
+  height: 100%;
+  border-radius: 0;
   overflow: hidden;
-  border: 1px solid var(--rule);
+  border: 0;
+  border-right: 1px solid var(--rule-soft);
   background: var(--paper-deep);
-  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.3s ease, box-shadow 0.35s ease;
+  transition: filter 0.35s ease;
 }
 
 .carousel-item img {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  filter: grayscale(100%) contrast(1.05);
-  transition: filter 0.35s ease, transform 0.4s ease;
+  filter: grayscale(100%) opacity(0.35) contrast(1.05);
+  transition: filter 0.35s ease, transform 0.5s ease;
   display: block;
 }
 
-.carousel-item:hover {
-  transform: translateY(-4px) scale(1.02);
-  border-color: var(--accent);
-  box-shadow: 0 8px 24px rgba(27, 26, 23, 0.12);
-  z-index: 2;
-}
-
-.carousel-item:hover img {
-  filter: grayscale(0%) contrast(1);
-  transform: scale(1.04);
+.achievement-sub:hover .carousel-item img {
+  filter: grayscale(0%) opacity(0.55) contrast(1);
 }
 
 @keyframes scroll-ltr {
@@ -1923,7 +1939,7 @@ body.intro-active .intro {
   }
 
   .portrait {
-    max-width: clamp(14rem, 60vw, 20rem);
+    max-width: clamp(18rem, 75vw, 26rem);
     width: 100%;
     margin: 0 auto;
     text-align: center;
