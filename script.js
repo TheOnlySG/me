@@ -581,37 +581,40 @@ const initScrollPopup = () => {
   const popupBtn = document.getElementById("scrollPopupBtn");
   if (!popup || !popupBtn) return;
 
-  // Reveal popup smoothly slightly after intro completes
-  window.setTimeout(() => {
-    // Only show if user hasn't already scrolled away
-    if (window.scrollY < 80) {
-      popup.classList.add("is-visible");
-    }
-  }, 400);
+  let ticking = false;
 
-  const dismissPopup = () => {
-    if (popup.classList.contains("is-dismissed")) return;
-    popup.classList.remove("is-visible");
-    popup.classList.add("is-dismissed");
-    window.removeEventListener("scroll", onScrollDismiss);
+  const updatePopupVisibility = () => {
+    // Show when at or near top (scrollY <= 40), hide when scrolled down
+    if (window.scrollY <= 40) {
+      popup.classList.add("is-visible");
+    } else {
+      popup.classList.remove("is-visible");
+    }
+    ticking = false;
   };
 
-  const onScrollDismiss = () => {
-    if (window.scrollY > 40) {
-      dismissPopup();
+  // Reveal popup smoothly slightly after intro completes
+  window.setTimeout(() => {
+    updatePopupVisibility();
+  }, 400);
+
+  const onScroll = () => {
+    if (!ticking) {
+      window.requestAnimationFrame(updatePopupVisibility);
+      ticking = true;
     }
   };
 
   popupBtn.addEventListener("click", (e) => {
     e.preventDefault();
     const target = document.querySelector("#work");
-    dismissPopup();
+    popup.classList.remove("is-visible");
     if (target) {
       target.scrollIntoView({ behavior: "smooth" });
     }
   });
 
-  window.addEventListener("scroll", onScrollDismiss, { passive: true });
+  window.addEventListener("scroll", onScroll, { passive: true });
 };
 
 const completeIntro = () => {

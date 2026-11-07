@@ -1829,7 +1829,7 @@ body.intro-active .masthead {
 
 .skills-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 360px), 1fr));
   gap: clamp(1.2rem, 2vw, 2rem);
   margin-top: 2rem;
 }
@@ -2389,6 +2389,10 @@ body.intro-active .masthead {
 }
 
 @media (max-width: 768px) {
+  .skills-grid {
+    grid-template-columns: 1fr;
+  }
+
   /* Centralize mobile HUD bar and hide telemetry & monogram */
   .hud-brand,
   .hud-telemetry,
