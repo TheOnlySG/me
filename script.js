@@ -8,6 +8,19 @@ if (year) {
 
 const navLinks = Array.from(document.querySelectorAll('.hud-nav a[href^="#"]'));
 const hudSectionTitle = document.getElementById("hudSectionTitle");
+const mastheadElem = document.querySelector(".masthead");
+const heroSectionElem = document.getElementById("top");
+
+function updateMastheadTheme() {
+  if (!mastheadElem || !heroSectionElem) return;
+  const heroBottom = heroSectionElem.offsetTop + heroSectionElem.offsetHeight;
+  const isOverDarkHero = window.scrollY < (heroBottom - 90);
+  mastheadElem.classList.toggle("is-dark", isOverDarkHero);
+}
+
+window.addEventListener("scroll", updateMastheadTheme, { passive: true });
+updateMastheadTheme();
+
 const sections = navLinks
   .map((link) => document.querySelector(link.getAttribute("href")))
   .filter(Boolean);
@@ -294,6 +307,9 @@ const updateProgress = () => {
   const distance = document.documentElement.scrollHeight - window.innerHeight;
   const progress = distance > 0 ? Math.min(Math.max(window.scrollY / distance, 0), 1) : 0;
   progressBar.style.transform = `scaleX(${progress})`;
+  if (progressBar.parentElement) {
+    progressBar.parentElement.style.opacity = progress > 0.005 ? "1" : "0";
+  }
 };
 
 let progressQueued = false;

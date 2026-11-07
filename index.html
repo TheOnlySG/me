@@ -67,6 +67,14 @@
     ]
   }
   </script>
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "https://cdn.jsdelivr.net/npm/three@0.162.0/build/three.module.js",
+      "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.162.0/examples/jsm/"
+    }
+  }
+  </script>
 </head>
 <body>
   <a class="skip" href="#main">Skip to content</a>
@@ -84,13 +92,11 @@
 
   <div class="intro-wipe" id="introWipe" aria-hidden="true"></div>
 
-  <header class="masthead">
+  <header class="masthead is-dark">
     <div class="hud-bar">
-      <!-- Monogram & Status Beacon -->
+      <!-- Monogram Brand -->
       <a class="hud-brand" href="#top" aria-label="Spandan Ghodke Homepage">
         <span class="hud-monogram">SG</span>
-        <span class="hud-status-dot" aria-hidden="true"></span>
-        <span class="hud-status-text">SYS.ACTIVE</span>
       </a>
 
       <!-- Dynamic Center Telemetry -->
@@ -115,13 +121,7 @@
 
   <main id="main">
     <section class="hero" id="top">
-      <div class="hero-kicker-badge" aria-hidden="true">
-        <span class="kicker-chip">MODEL_RUNNER // V2.6</span>
-        <span class="kicker-sep">✦</span>
-        <span>AI &amp; APPLIED ML RESEARCH</span>
-        <span class="kicker-sep">✦</span>
-        <span>TENSOR ARCHITECTURE</span>
-      </div>
+      <canvas id="neural-network-canvas" aria-hidden="true"></canvas>
       <h1 aria-label="Spandan Ghodke">
         <span class="hero-line"><span>Spandan</span></span>
         <span class="hero-line"><span><em>Ghodke</em></span></span>
@@ -679,5 +679,6 @@
   </footer>
 
   <script src="script.js"></script>
+  <script type="module" src="nn-hero.js"></script>
 </body>
 </html>
