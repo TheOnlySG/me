@@ -105,8 +105,8 @@
         <span class="hud-telemetry-title" id="hudSectionTitle">TOP</span>
       </div>
 
-      <!-- Quick-Dial Index Strip -->
-      <nav class="hud-nav" aria-label="Sections">
+      <!-- Quick-Dial Index Strip (PC/Desktop) -->
+      <nav class="hud-nav hud-nav--desktop" aria-label="Sections">
         <a href="#work" data-section="work" data-label="Deployed Models"><span class="hud-num">01</span><span class="hud-tip">Models</span></a>
         <a href="#about" data-section="about" data-label="Philosophy &amp; Ops"><span class="hud-num">02</span><span class="hud-tip">About</span></a>
         <a href="#experience" data-section="experience" data-label="Applied ML Practice"><span class="hud-num">03</span><span class="hud-tip">Experience</span></a>
@@ -115,6 +115,14 @@
         <a href="#achievements" data-section="achievements" data-label="Benchmarks &amp; Podiums"><span class="hud-num">06</span><span class="hud-tip">Records</span></a>
         <a href="#skills" data-section="skills" data-label="ML Pipeline Stack"><span class="hud-num">07</span><span class="hud-tip">Pipeline</span></a>
         <a href="#contact" data-section="contact" data-label="Transmission &amp; Collab"><span class="hud-num">08</span><span class="hud-tip">Contact</span></a>
+      </nav>
+
+      <!-- Minimal Navbar Strip (Mobile Only) -->
+      <nav class="hud-nav hud-nav--mobile" aria-label="Mobile Navigation">
+        <a href="#work" data-section="work" data-label="Projects">Projects</a>
+        <a href="#about" data-section="about" data-label="About">About</a>
+        <a href="#experience" data-section="experience" data-label="Experience">Experience</a>
+        <a href="#achievements" data-section="achievements" data-label="Achievements">Achievements</a>
       </nav>
     </div>
   </header>
@@ -154,6 +162,12 @@
           </div>
         </aside>
       </div>
+
+      <!-- Mobile-only scroll cue pointing to Deployed Systems & Models -->
+      <a href="#work" class="hero-scroll-cue" aria-label="Scroll to Deployed Systems &amp; Models">
+        <span class="hero-scroll-cue-text">Explore Systems</span>
+        <span class="hero-scroll-cue-icon" aria-hidden="true">↓</span>
+      </a>
     </section>
 
     <!-- Marquee Ticker Band -->
