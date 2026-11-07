@@ -73,27 +73,11 @@
 
   <div class="progress" aria-hidden="true"><span id="progressBar"></span></div>
 
-  <div class="intro" id="intro" aria-hidden="true">
-    <div class="intro-inner">
-      <div class="intro-terminal">
-        <p class="intro-command"><span class="intro-prompt" aria-hidden="true">$</span><span id="introCommand"></span><span class="intro-caret" aria-hidden="true"></span></p>
-        <p class="intro-name">
-          <span id="introName"></span>
-          <span class="intro-name-scan" aria-hidden="true"></span>
-          <span class="intro-name-caret" aria-hidden="true"></span>
-        </p>
-        <p class="intro-status"><span aria-hidden="true">→</span> AI &amp; Data Science / ML systems / GenAI</p>
-        <div class="intro-build" aria-hidden="true">
-          <p class="intro-build-command"><span class="intro-prompt">$</span><span id="introBuildCommand"></span><span class="intro-build-caret"></span></p>
-          <div class="intro-build-meter">
-            <span class="intro-build-track"><span></span></span>
-            <span class="intro-build-state" id="introBuildState">queued</span>
-          </div>
-        </div>
-      </div>
-      <div class="intro-foot">
-        <p>Press <kbd>Esc</kbd> to skip</p>
-        <button class="intro-skip" type="button" tabindex="-1">Skip intro</button>
+  <div class="intro" id="intro" aria-label="Dimensionality Reduction Intro">
+    <canvas id="latentCanvas"></canvas>
+    <div class="intro-hud">
+      <div class="intro-skip-prompt">
+        <span>PRESS <kbd>ESC</kbd> OR TAP TO SKIP</span>
       </div>
     </div>
   </div>

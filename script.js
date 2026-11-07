@@ -97,11 +97,8 @@ if (copyButton) {
 }
 
 const intro = document.getElementById("intro");
-const introCommand = document.getElementById("introCommand");
-const introName = document.getElementById("introName");
-const introBuildCommand = document.getElementById("introBuildCommand");
-const introBuildState = document.getElementById("introBuildState");
-const introSkip = document.querySelector(".intro-skip");
+const latentCanvas = document.getElementById("latentCanvas");
+const introSkipPrompt = document.querySelector(".intro-skip, .intro-skip-prompt");
 const introWipe = document.getElementById("introWipe");
 const progressBar = document.getElementById("progressBar");
 
@@ -355,122 +352,195 @@ const bindParallax = () => {
   });
 };
 
-const typeText = (element, text, speed, token) =>
-  new Promise((resolve) => {
-    if (!element) {
+let particleAnimId = null;
+
+// High-Dimensional Latent Space Simulation
+const playLatentProjection = (token) => {
+  return new Promise((resolve) => {
+    if (!latentCanvas) {
       resolve();
       return;
     }
 
-    let index = 0;
+    const ctx = latentCanvas.getContext("2d");
+    if (!ctx) {
+      resolve();
+      return;
+    }
 
-    const type = () => {
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    let width = (latentCanvas.width = window.innerWidth * dpr);
+    let height = (latentCanvas.height = window.innerHeight * dpr);
+    latentCanvas.style.width = `${window.innerWidth}px`;
+    latentCanvas.style.height = `${window.innerHeight}px`;
+
+    // Adaptive typography: Stack on narrow portrait screens, horizontal on wide/landscape
+    const isPortrait = window.innerHeight > window.innerWidth;
+    const isNarrow = window.innerWidth < 768;
+    const useTwoLines = isNarrow && isPortrait;
+    const lines = useTwoLines ? ["SPANDAN", "GHODKE"] : ["SPANDAN GHODKE"];
+
+    // Increased prominent font sizes
+    const cssFont = useTwoLines
+      ? Math.max(50, Math.min(80, Math.floor(window.innerWidth * 0.145)))
+      : Math.max(72, Math.min(115, Math.floor(window.innerWidth * 0.062)));
+
+    const fontPx = Math.floor(cssFont * dpr);
+
+    // 1. Generate Target Coordinates from Typographic Raster
+    const offCanvas = document.createElement("canvas");
+    const offCtx = offCanvas.getContext("2d");
+    offCanvas.width = width;
+    offCanvas.height = height;
+
+    offCtx.fillStyle = "#ffffff";
+    offCtx.font = `600 ${fontPx}px "Newsreader", Georgia, serif`;
+    offCtx.textAlign = "center";
+    offCtx.textBaseline = "middle";
+
+    const centerY = height / 2;
+    const lineGap = fontPx * 1.26;
+
+    if (lines.length === 2) {
+      offCtx.fillText(lines[0], width / 2, centerY - lineGap * 0.48);
+      offCtx.fillText(lines[1], width / 2, centerY + lineGap * 0.48);
+    } else {
+      offCtx.fillText(lines[0], width / 2, centerY);
+    }
+
+    const imgData = offCtx.getImageData(0, 0, width, height).data;
+    const targets = [];
+    const step = Math.max(3, Math.floor(3.2 * dpr));
+
+    const textSpan = lines.length * lineGap + 50 * dpr;
+    const minY = Math.max(0, Math.floor(centerY - textSpan / 2));
+    const maxY = Math.min(height, Math.ceil(centerY + textSpan / 2));
+
+    for (let y = minY; y < maxY; y += step) {
+      for (let x = 0; x < width; x += step) {
+        const index = (y * width + x) * 4;
+        if (imgData[index + 3] > 110) {
+          targets.push({ x, y });
+        }
+      }
+    }
+
+    // 2. Initialize Latent Particles
+    const numParticles = Math.min(targets.length, useTwoLines ? 420 : 680);
+    const shuffledTargets = targets.sort(() => Math.random() - 0.5).slice(0, numParticles);
+
+    const particles = [];
+    for (let i = 0; i < numParticles; i++) {
+      const tgt = shuffledTargets[i];
+      const startX = Math.random() * width;
+      const startY = Math.random() * height;
+      particles.push({
+        x: startX,
+        y: startY,
+        startX: startX,
+        startY: startY,
+        targetX: tgt.x,
+        targetY: tgt.y,
+        radius: (Math.random() * 1.4 + 1.2) * dpr,
+        color: i % 5 === 0 ? "#608983" : i % 8 === 0 ? "#3A6B65" : i % 11 === 0 ? "#EAECE9" : "#BAC5BF",
+        alpha: Math.random() * 0.45 + 0.55,
+        spiralAngle: (Math.random() - 0.5) * Math.PI * 2,
+        spiralDist: (Math.random() * 85 + 35) * dpr,
+        phase: Math.random() * Math.PI * 2,
+      });
+    }
+
+    let startTime = performance.now();
+
+    const tick = (now) => {
       if (token !== introToken) {
+        cancelAnimationFrame(particleAnimId);
         resolve();
         return;
       }
 
-      element.textContent = text.slice(0, index);
+      const elapsed = (now - startTime) / 1000;
 
-      if (index >= text.length) {
-        resolve();
-        return;
+      // Soft persistence trail for particle streaks
+      ctx.fillStyle = "rgba(25, 44, 45, 0.26)";
+      ctx.fillRect(0, 0, width, height);
+
+      // Dedicated compaction journey: takes 3.1 full seconds for particles to travel and assemble!
+      const compactionDuration = 3.1;
+      const progress = Math.min(Math.max((elapsed - 0.1) / compactionDuration, 0), 1);
+
+      // Smooth in-out cubic easing: starts gently, swirls inward, and gracefully decelerates into letter glyphs
+      const ease = progress < 0.5
+        ? 4 * progress * progress * progress
+        : 1 - Math.pow(-2 * progress + 2, 3) / 2;
+
+      for (let i = 0; i < particles.length; i++) {
+        const p = particles[i];
+
+        if (progress < 1.0) {
+          // Particles actively traveling together into form over the full 3.1s
+          const swirlDamp = 1 - ease;
+          const currentSwirl = Math.sin(now * 0.0025 + p.phase) * p.spiralDist * swirlDamp;
+          const currentAngle = p.spiralAngle * swirlDamp;
+
+          p.x = p.startX + (p.targetX - p.startX) * ease + Math.cos(currentAngle) * currentSwirl;
+          p.y = p.startY + (p.targetY - p.startY) * ease + Math.sin(currentAngle) * currentSwirl;
+        } else {
+          // Fully assembled into crisp letter glyphs
+          p.x = p.targetX;
+          p.y = p.targetY;
+        }
+
+        // Draw Vector Point
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+        ctx.fillStyle = p.color;
+        ctx.globalAlpha = p.alpha;
+        ctx.fill();
+
+        // Delaunay Mesh connecting close neighbors during active convergence
+        if (progress > 0.25 && progress < 0.96 && i % 3 === 0) {
+          for (let j = i + 1; j < Math.min(i + 4, particles.length); j++) {
+            const p2 = particles[j];
+            const distSq = (p.x - p2.x) ** 2 + (p.y - p2.y) ** 2;
+            const maxDistSq = (46 * dpr) ** 2;
+            if (distSq < maxDistSq) {
+              ctx.beginPath();
+              ctx.moveTo(p.x, p.y);
+              ctx.lineTo(p2.x, p2.y);
+              ctx.strokeStyle = "#3A6B65";
+              ctx.globalAlpha = (1 - distSq / maxDistSq) * 0.35;
+              ctx.lineWidth = 0.75 * dpr;
+              ctx.stroke();
+            }
+          }
+        }
       }
 
-      index += 1;
-      window.setTimeout(type, speed);
+      ctx.globalAlpha = 1.0;
+
+      // 3.1s travel + brief 0.35s snap hold = 3.45s total
+      if (elapsed < 3.45) {
+        particleAnimId = requestAnimationFrame(tick);
+      } else {
+        cancelAnimationFrame(particleAnimId);
+        resolve();
+      }
     };
 
-    type();
+    particleAnimId = requestAnimationFrame(tick);
   });
+};
 
 const playIntro = async (token) => {
   const fontsReady = document.fonts ? document.fonts.ready : Promise.resolve();
-  await Promise.race([fontsReady, wait(650)]);
+  await Promise.race([fontsReady, wait(450)]);
 
-  if (token !== introToken) {
-    return;
-  }
+  if (token !== introToken) return;
 
-  await wait(220);
+  await playLatentProjection(token);
 
-  if (token !== introToken) {
-    return;
-  }
-
-  await typeText(introCommand, "whoami", 62, token);
-
-  if (token !== introToken) {
-    return;
-  }
-
-  await wait(160);
-
-  if (token !== introToken) {
-    return;
-  }
-
-  intro.classList.add("is-naming");
-  await typeText(introName, "spandanghodke", 34, token);
-
-  if (token !== introToken) {
-    return;
-  }
-
-  await wait(160);
-
-  if (token !== introToken) {
-    return;
-  }
-
-  intro.classList.add("is-ready");
-  await wait(280);
-
-  if (token !== introToken) {
-    return;
-  }
-
-  intro.classList.add("is-shipping");
-  if (introBuildState) {
-    introBuildState.textContent = "pushing";
-  }
-
-  await wait(100);
-
-  if (token !== introToken) {
-    return;
-  }
-
-  await typeText(introBuildCommand, "git push origin main", 20, token);
-
-  if (token !== introToken) {
-    return;
-  }
-
-  await wait(70);
-
-  if (token !== introToken) {
-    return;
-  }
-
-  intro.classList.add("is-lighting");
-  revealSite();
-  await wait(760);
-
-  if (token !== introToken) {
-    return;
-  }
-
-  intro.classList.add("is-deployed");
-  if (introBuildState) {
-    introBuildState.textContent = "deployed";
-  }
-
-  await wait(140);
-
-  if (token !== introToken) {
-    return;
-  }
+  if (token !== introToken) return;
 
   finishIntro(false);
 };
@@ -525,8 +595,8 @@ const finishIntro = (fast) => {
   introHandlers.forEach((remove) => remove());
   introHandlers = [];
 
-  if (introSkip) {
-    introSkip.hidden = true;
+  if (introSkipPrompt) {
+    introSkipPrompt.hidden = true;
   }
 
   if (!intro || typeof intro.animate !== "function") {
@@ -597,15 +667,15 @@ const startIntro = () => {
     finishIntro(true);
   };
 
-  if (introSkip) {
-    introSkip.addEventListener("click", skip);
+  if (intro) {
+    intro.addEventListener("click", skip);
   }
   document.addEventListener("keydown", skip);
 
   introHandlers = [
     () => {
-      if (introSkip) {
-        introSkip.removeEventListener("click", skip);
+      if (intro) {
+        intro.removeEventListener("click", skip);
       }
     },
     () => document.removeEventListener("keydown", skip),
