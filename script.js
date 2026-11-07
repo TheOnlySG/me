@@ -573,6 +573,48 @@ const revealSite = () => {
   bindProgress();
   bindParallax();
   updateProgress();
+  initScrollPopup();
+};
+
+const initScrollPopup = () => {
+  const popup = document.getElementById("scrollPopup");
+  const popupBtn = document.getElementById("scrollPopupBtn");
+  if (!popup || !popupBtn) return;
+
+  let ticking = false;
+
+  const updatePopupVisibility = () => {
+    // Show when at or near top (scrollY <= 40), hide when scrolled down
+    if (window.scrollY <= 40) {
+      popup.classList.add("is-visible");
+    } else {
+      popup.classList.remove("is-visible");
+    }
+    ticking = false;
+  };
+
+  // Reveal popup smoothly slightly after intro completes
+  window.setTimeout(() => {
+    updatePopupVisibility();
+  }, 400);
+
+  const onScroll = () => {
+    if (!ticking) {
+      window.requestAnimationFrame(updatePopupVisibility);
+      ticking = true;
+    }
+  };
+
+  popupBtn.addEventListener("click", (e) => {
+    e.preventDefault();
+    const target = document.querySelector("#work");
+    popup.classList.remove("is-visible");
+    if (target) {
+      target.scrollIntoView({ behavior: "smooth" });
+    }
+  });
+
+  window.addEventListener("scroll", onScroll, { passive: true });
 };
 
 const completeIntro = () => {
