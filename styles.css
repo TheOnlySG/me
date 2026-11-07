@@ -860,29 +860,12 @@ body.intro-active .intro {
   color: var(--muted);
 }
 
-.hero-stat-row {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-  gap: clamp(0.8rem, 2vw, 1.6rem);
-  align-items: end;
-}
-
-.hero-stat--talks {
-  align-items: flex-start;
-  text-align: left;
-}
-
 .hero-stat--talks .hero-stat-value {
-  font-size: clamp(2.2rem, 3.6vw, 3.3rem);
-}
-
-.hero-stat--events {
-  align-items: flex-end;
-  text-align: right;
+  font-size: clamp(2.4rem, 4vw, 3.8rem);
 }
 
 .hero-stat--events .hero-stat-value {
-  font-size: clamp(2.8rem, 4.4vw, 4.1rem);
+  font-size: clamp(2.4rem, 4vw, 3.8rem);
 }
 
 .section {
@@ -1110,13 +1093,14 @@ body.intro-active .intro {
 
 .about-grid {
   display: grid;
-  grid-template-columns: 13rem minmax(0, 1fr);
+  grid-template-columns: clamp(16rem, 24vw, 22rem) minmax(0, 1fr);
   gap: clamp(2rem, 6vw, 5rem);
   align-items: start;
 }
 
 .portrait {
-  max-width: 13rem;
+  max-width: clamp(16rem, 24vw, 22rem);
+  width: 100%;
 }
 
 .portrait img {
@@ -1357,17 +1341,44 @@ body.intro-active .intro {
   text-wrap: pretty;
 }
 
+.achievement-sub {
+  position: relative;
+  margin-top: clamp(2.5rem, 5vw, 4.5rem);
+  min-height: clamp(240px, 32vw, 360px);
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+  border-radius: 4px;
+}
+
+.achievement-sub:first-of-type {
+  margin-top: 0;
+}
+
+.achievement-sub + .achievement-sub {
+  margin-top: clamp(2.5rem, 5vw, 4.5rem);
+  padding-top: 0;
+  border-top: 1px solid var(--rule);
+}
+
 .record-body {
+  position: relative;
+  z-index: 2;
+  width: 100%;
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  grid-template-columns: auto minmax(0, 1fr);
   gap: clamp(1.5rem, 4vw, 4rem);
-  align-items: end;
-  padding-top: 1.5rem;
+  align-items: center;
+  padding: clamp(1.5rem, 4vw, 3rem);
+  background: rgba(246, 244, 238, 0.88);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
   border-top: 1px solid var(--ink);
+  border-bottom: 1px solid var(--rule);
 }
 
 .record-number {
-  font-size: clamp(6rem, 16vw, 13rem);
+  font-size: clamp(4.5rem, 11vw, 9.5rem);
   font-weight: 500;
   line-height: 0.78;
   letter-spacing: -0.06em;
@@ -1388,6 +1399,7 @@ body.intro-active .intro {
   transform-origin: left bottom;
 }
 
+.motion-ready .achievement-sub.is-visible .plus,
 .motion-ready .record-body.is-visible .plus {
   animation: plus-pop 0.9s cubic-bezier(0.16, 1, 0.3, 1) 0.35s both;
 }
@@ -1409,7 +1421,7 @@ body.intro-active .intro {
 }
 
 .record-copy {
-  max-width: 34ch;
+  max-width: 36ch;
   padding-bottom: 0.8rem;
 }
 
@@ -1427,7 +1439,7 @@ body.intro-active .intro {
 }
 
 .awards {
-  margin-top: clamp(2.5rem, 5vw, 4rem);
+  margin-top: clamp(2rem, 4vw, 3.2rem);
   border-top: 1px solid var(--ink);
 }
 
@@ -1465,6 +1477,78 @@ body.intro-active .intro {
   color: var(--muted);
   font-size: 0.92rem;
   line-height: 1.5;
+}
+
+/* Continuous Carousel (Left to Right Marquee, background layer) */
+.carousel {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  margin: 0;
+  padding: 0;
+  z-index: 1;
+  pointer-events: auto;
+}
+
+.carousel-track {
+  display: flex;
+  width: max-content;
+  height: 100%;
+  animation: scroll-ltr 32s linear infinite;
+  will-change: transform;
+}
+
+.achievement-sub:hover .carousel-track {
+  animation-play-state: paused;
+}
+
+.carousel-group {
+  display: flex;
+  align-items: stretch;
+  gap: 0;
+  margin: 0;
+  padding: 0;
+  flex-shrink: 0;
+  height: 100%;
+}
+
+.carousel-item {
+  flex-shrink: 0;
+  width: clamp(240px, 30vw, 360px);
+  height: 100%;
+  border-radius: 0;
+  overflow: hidden;
+  border: 0;
+  border-right: 1px solid var(--rule-soft);
+  background: var(--paper-deep);
+  transition: filter 0.35s ease;
+}
+
+.carousel-item img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: grayscale(100%) opacity(0.35) contrast(1.05);
+  transition: filter 0.35s ease, transform 0.5s ease;
+  display: block;
+}
+
+.achievement-sub:hover .carousel-item img {
+  filter: grayscale(0%) opacity(0.55) contrast(1);
+}
+
+@keyframes scroll-ltr {
+  0% {
+    transform: translateX(-50%);
+  }
+  100% {
+    transform: translateX(0);
+  }
 }
 
 .skills {
@@ -1772,17 +1856,45 @@ body.intro-active .intro {
 @media (max-width: 900px) {
   .hero-foot {
     grid-template-columns: 1fr;
-    gap: 2rem;
+    gap: 2.5rem;
   }
 
   .hero-stats {
+    flex-direction: row;
+    flex-wrap: nowrap;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: clamp(0.75rem, 2.5vw, 1.8rem);
     text-align: left;
+    width: 100%;
+    padding-top: 1.2rem;
+    border-top: 1px solid var(--rule-soft);
   }
 
-  .hero-stat--podium,
-  .hero-stat--events {
+  .hero-stat {
+    flex: 1;
+    min-width: 0;
     align-items: flex-start;
     text-align: left;
+    gap: 0.25rem;
+  }
+
+  .hero-stat--podium .hero-stat-value {
+    font-size: clamp(2.4rem, 8vw, 3.8rem);
+  }
+
+  .hero-stat--talks .hero-stat-value,
+  .hero-stat--events .hero-stat-value {
+    font-size: clamp(2.4rem, 8vw, 3.8rem);
+  }
+
+  .hero-stat-label {
+    font-size: clamp(0.5rem, 1.6vw, 0.58rem);
+    line-height: 1.35;
+  }
+
+  .hero-stat-note {
+    font-size: clamp(0.46rem, 1.4vw, 0.52rem);
   }
 
   .hero-links {
@@ -1823,10 +1935,21 @@ body.intro-active .intro {
 
   .about-grid {
     grid-template-columns: 1fr;
+    justify-items: center;
   }
 
   .portrait {
-    max-width: 11rem;
+    max-width: clamp(18rem, 75vw, 26rem);
+    width: 100%;
+    margin: 0 auto;
+    text-align: center;
+  }
+
+  .about-copy {
+    text-align: justify;
+    text-justify: inter-word;
+    hyphens: auto;
+    width: 100%;
   }
 
   .facts {
@@ -1876,21 +1999,23 @@ body.intro-active .intro {
     letter-spacing: 0.09em;
   }
 
-  .hero-stat--podium .hero-stat-value {
-    font-size: clamp(4rem, 18vw, 5.5rem);
+  .hero-stats {
+    gap: 0.6rem;
   }
 
-  .hero-stat--talks .hero-stat-value {
-    font-size: clamp(2rem, 9vw, 2.8rem);
-  }
-
+  .hero-stat--podium .hero-stat-value,
+  .hero-stat--talks .hero-stat-value,
   .hero-stat--events .hero-stat-value {
-    font-size: clamp(2.5rem, 11vw, 3.4rem);
+    font-size: clamp(1.8rem, 7.5vw, 2.5rem);
   }
 
-  .hero-stat-label,
+  .hero-stat-label {
+    font-size: 0.5rem;
+    line-height: 1.3;
+  }
+
   .hero-stat-note {
-    font-size: 0.54rem;
+    display: none;
   }
 
   .entry-head {
@@ -1952,13 +2077,31 @@ body.intro-active .intro {
   }
 }
 
+@media (max-width: 620px) {
+  .masthead {
+    justify-content: center;
+  }
+
+  .masthead nav {
+    justify-content: center;
+    flex-wrap: wrap;
+    text-align: center;
+  }
+}
+
 @media (max-width: 480px) {
   .masthead {
     height: auto;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 0.65rem;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
     padding-block: 0.9rem;
+  }
+
+  .masthead nav {
+    justify-content: center;
+    gap: 0.65rem 0.85rem;
+    width: 100%;
   }
 }
 
@@ -1970,7 +2113,7 @@ body.intro-active .intro {
   }
 
   .masthead nav {
-    gap: 0.4rem;
+    gap: 0.4rem 0.6rem;
     font-size: 0.5rem;
     letter-spacing: 0.045em;
   }
