@@ -6,22 +6,29 @@ if (year) {
   year.textContent = new Date().getFullYear();
 }
 
-const navLinks = Array.from(document.querySelectorAll('.masthead nav a[href^="#"]'));
+const navLinks = Array.from(document.querySelectorAll('.hud-nav a[href^="#"]'));
+const hudSectionTitle = document.getElementById("hudSectionTitle");
 const sections = navLinks
   .map((link) => document.querySelector(link.getAttribute("href")))
   .filter(Boolean);
 
 if ("IntersectionObserver" in window && sections.length) {
   const setActive = (id) => {
+    let activeLabel = "TOP";
     navLinks.forEach((link) => {
       const isActive = link.getAttribute("href") === `#${id}`;
       link.classList.toggle("is-active", isActive);
       if (isActive) {
         link.setAttribute("aria-current", "location");
+        activeLabel = link.dataset.label || link.dataset.section?.toUpperCase() || id.toUpperCase();
       } else {
         link.removeAttribute("aria-current");
       }
     });
+
+    if (hudSectionTitle) {
+      hudSectionTitle.textContent = activeLabel;
+    }
   };
 
   const observer = new IntersectionObserver(
@@ -32,7 +39,7 @@ if ("IntersectionObserver" in window && sections.length) {
         }
       });
     },
-    { rootMargin: "-45% 0px -50% 0px", threshold: 0 }
+    { rootMargin: "-35% 0px -45% 0px", threshold: 0 }
   );
 
   sections.forEach((section) => observer.observe(section));
@@ -40,11 +47,14 @@ if ("IntersectionObserver" in window && sections.length) {
   window.addEventListener(
     "scroll",
     () => {
-      if (window.scrollY < 200) {
+      if (window.scrollY < 180) {
         navLinks.forEach((link) => {
           link.classList.remove("is-active");
           link.removeAttribute("aria-current");
         });
+        if (hudSectionTitle) {
+          hudSectionTitle.textContent = "TOP";
+        }
       }
     },
     { passive: true }
@@ -102,7 +112,7 @@ const revealGroups = [
   [".facts > div", 80],
   [".entry", 65],
   [".achievement-sub", 0],
-  [".skills > div", 55],
+  [".skill-card", 70],
   [".contact-lede, .email, .contact-actions", 90],
   [".footer-row, .colophon", 80],
 ];
