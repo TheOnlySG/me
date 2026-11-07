@@ -573,6 +573,45 @@ const revealSite = () => {
   bindProgress();
   bindParallax();
   updateProgress();
+  initScrollPopup();
+};
+
+const initScrollPopup = () => {
+  const popup = document.getElementById("scrollPopup");
+  const popupBtn = document.getElementById("scrollPopupBtn");
+  if (!popup || !popupBtn) return;
+
+  // Reveal popup smoothly slightly after intro completes
+  window.setTimeout(() => {
+    // Only show if user hasn't already scrolled away
+    if (window.scrollY < 80) {
+      popup.classList.add("is-visible");
+    }
+  }, 400);
+
+  const dismissPopup = () => {
+    if (popup.classList.contains("is-dismissed")) return;
+    popup.classList.remove("is-visible");
+    popup.classList.add("is-dismissed");
+    window.removeEventListener("scroll", onScrollDismiss);
+  };
+
+  const onScrollDismiss = () => {
+    if (window.scrollY > 40) {
+      dismissPopup();
+    }
+  };
+
+  popupBtn.addEventListener("click", (e) => {
+    e.preventDefault();
+    const target = document.querySelector("#work");
+    dismissPopup();
+    if (target) {
+      target.scrollIntoView({ behavior: "smooth" });
+    }
+  });
+
+  window.addEventListener("scroll", onScrollDismiss, { passive: true });
 };
 
 const completeIntro = () => {
