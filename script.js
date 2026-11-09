@@ -390,32 +390,51 @@ const playLatentProjection = (token) => {
     latentCanvas.style.width = `${window.innerWidth}px`;
     latentCanvas.style.height = `${window.innerHeight}px`;
 
-    // Adaptive typography: Stack on narrow portrait screens, horizontal on wide/landscape
-    const isPortrait = window.innerHeight > window.innerWidth;
-    const isNarrow = window.innerWidth < 768;
-    const useTwoLines = isNarrow && isPortrait;
-    const lines = useTwoLines ? ["SPANDAN", "GHODKE"] : ["SPANDAN GHODKE"];
+    // 1. Adaptive Typography & Measurement: Never clip on any aspect ratio
+    const isPortrait = height > width;
+    const isNarrow = window.innerWidth < 880;
+    let useTwoLines = isPortrait || isNarrow;
+    let lines = useTwoLines ? ["SPANDAN", "GHODKE"] : ["SPANDAN GHODKE"];
 
-    // Increased prominent font sizes
-    const cssFont = useTwoLines
-      ? Math.max(50, Math.min(80, Math.floor(window.innerWidth * 0.145)))
-      : Math.max(72, Math.min(115, Math.floor(window.innerWidth * 0.062)));
-
-    const fontPx = Math.floor(cssFont * dpr);
-
-    // 1. Generate Target Coordinates from Typographic Raster
     const offCanvas = document.createElement("canvas");
     const offCtx = offCanvas.getContext("2d");
     offCanvas.width = width;
     offCanvas.height = height;
 
+    // Desired base font size
+    let targetCssFont = useTwoLines
+      ? Math.max(46, Math.min(84, Math.floor(window.innerWidth * 0.138)))
+      : Math.max(50, Math.min(108, Math.floor(window.innerWidth * 0.056)));
+
+    const maxSafeWidth = width * 0.82;
+    let fontPx = Math.floor(targetCssFont * dpr);
+    offCtx.font = `600 ${fontPx}px "Newsreader", "Times New Roman", Georgia, serif`;
+
+    let longestLineWidth = Math.max(...lines.map((l) => offCtx.measureText(l).width));
+
+    // If 1-line text exceeds safe width, automatically switch to 2 lines
+    if (!useTwoLines && longestLineWidth > maxSafeWidth) {
+      useTwoLines = true;
+      lines = ["SPANDAN", "GHODKE"];
+      targetCssFont = Math.max(46, Math.min(84, Math.floor(window.innerWidth * 0.138)));
+      fontPx = Math.floor(targetCssFont * dpr);
+      offCtx.font = `600 ${fontPx}px "Newsreader", "Times New Roman", Georgia, serif`;
+      longestLineWidth = Math.max(...lines.map((l) => offCtx.measureText(l).width));
+    }
+
+    // Scale down proportionally if text still exceeds safe bounds
+    if (longestLineWidth > maxSafeWidth && longestLineWidth > 0) {
+      const scaleFactor = maxSafeWidth / longestLineWidth;
+      fontPx = Math.floor(fontPx * scaleFactor);
+      offCtx.font = `600 ${fontPx}px "Newsreader", "Times New Roman", Georgia, serif`;
+    }
+
     offCtx.fillStyle = "#ffffff";
-    offCtx.font = `600 ${fontPx}px "Newsreader", Georgia, serif`;
     offCtx.textAlign = "center";
     offCtx.textBaseline = "middle";
 
     const centerY = height / 2;
-    const lineGap = fontPx * 1.26;
+    const lineGap = fontPx * 1.24;
 
     if (lines.length === 2) {
       offCtx.fillText(lines[0], width / 2, centerY - lineGap * 0.48);
@@ -425,29 +444,42 @@ const playLatentProjection = (token) => {
     }
 
     const imgData = offCtx.getImageData(0, 0, width, height).data;
-    const targets = [];
-    const step = Math.max(3, Math.floor(3.2 * dpr));
+    const rawTargets = [];
+    // High-resolution scan step (2.2px) so all curve anti-aliasing is captured
+    const scanStep = Math.max(2, Math.floor(2.2 * dpr));
 
     const textSpan = lines.length * lineGap + 50 * dpr;
     const minY = Math.max(0, Math.floor(centerY - textSpan / 2));
     const maxY = Math.min(height, Math.ceil(centerY + textSpan / 2));
 
-    for (let y = minY; y < maxY; y += step) {
-      for (let x = 0; x < width; x += step) {
+    for (let y = minY; y < maxY; y += scanStep) {
+      for (let x = 0; x < width; x += scanStep) {
         const index = (y * width + x) * 4;
-        if (imgData[index + 3] > 110) {
-          targets.push({ x, y });
+        if (imgData[index + 3] > 85) {
+          rawTargets.push({ x, y });
         }
       }
     }
 
-    // 2. Initialize Latent Particles
-    const numParticles = Math.min(targets.length, useTwoLines ? 420 : 680);
-    const shuffledTargets = targets.sort(() => Math.random() - 0.5).slice(0, numParticles);
+    // 2. Stratified Sampling & High-Density Particle Constellation
+    // Generates 1,400-1,800 particles on desktop, 950-1,300 on mobile/tablet
+    const desiredParticles = useTwoLines
+      ? Math.min(rawTargets.length, Math.max(900, Math.min(1350, Math.floor(window.innerWidth * 1.85))))
+      : Math.min(rawTargets.length, Math.max(1250, Math.min(1850, Math.floor(window.innerWidth * 1.15))));
 
+    // Stratified spatial stride: pick points evenly across the entire rasterized name
+    // This guarantees zero missing letters or random particle holes
+    const stride = rawTargets.length / desiredParticles;
+    const targets = [];
+    for (let i = 0; i < desiredParticles; i++) {
+      const idx = Math.floor(i * stride);
+      targets.push(rawTargets[idx]);
+    }
+
+    const numParticles = targets.length;
     const particles = [];
     for (let i = 0; i < numParticles; i++) {
-      const tgt = shuffledTargets[i];
+      const tgt = targets[i];
       const startX = Math.random() * width;
       const startY = Math.random() * height;
       particles.push({
@@ -457,11 +489,11 @@ const playLatentProjection = (token) => {
         startY: startY,
         targetX: tgt.x,
         targetY: tgt.y,
-        radius: (Math.random() * 1.4 + 1.2) * dpr,
-        color: i % 5 === 0 ? "#608983" : i % 8 === 0 ? "#3A6B65" : i % 11 === 0 ? "#EAECE9" : "#BAC5BF",
-        alpha: Math.random() * 0.45 + 0.55,
+        radius: (Math.random() * 1.1 + 0.95) * dpr,
+        color: i % 4 === 0 ? "#38F9D7" : i % 7 === 0 ? "#608983" : i % 10 === 0 ? "#3A6B65" : "#EAECE9",
+        alpha: Math.random() * 0.4 + 0.6,
         spiralAngle: (Math.random() - 0.5) * Math.PI * 2,
-        spiralDist: (Math.random() * 85 + 35) * dpr,
+        spiralDist: (Math.random() * 90 + 35) * dpr,
         phase: Math.random() * Math.PI * 2,
       });
     }
@@ -515,17 +547,17 @@ const playLatentProjection = (token) => {
         ctx.fill();
 
         // Delaunay Mesh connecting close neighbors during active convergence
-        if (progress > 0.25 && progress < 0.96 && i % 3 === 0) {
+        if (progress > 0.25 && progress < 0.96 && i % 4 === 0) {
           for (let j = i + 1; j < Math.min(i + 4, particles.length); j++) {
             const p2 = particles[j];
             const distSq = (p.x - p2.x) ** 2 + (p.y - p2.y) ** 2;
-            const maxDistSq = (46 * dpr) ** 2;
+            const maxDistSq = (44 * dpr) ** 2;
             if (distSq < maxDistSq) {
               ctx.beginPath();
               ctx.moveTo(p.x, p.y);
               ctx.lineTo(p2.x, p2.y);
               ctx.strokeStyle = "#3A6B65";
-              ctx.globalAlpha = (1 - distSq / maxDistSq) * 0.35;
+              ctx.globalAlpha = (1 - distSq / maxDistSq) * 0.32;
               ctx.lineWidth = 0.75 * dpr;
               ctx.stroke();
             }
@@ -549,8 +581,13 @@ const playLatentProjection = (token) => {
 };
 
 const playIntro = async (token) => {
-  const fontsReady = document.fonts ? document.fonts.ready : Promise.resolve();
-  await Promise.race([fontsReady, wait(450)]);
+  const fontLoader = document.fonts
+    ? Promise.all([
+        document.fonts.load('600 72px "Newsreader"'),
+        document.fonts.ready,
+      ])
+    : Promise.resolve();
+  await Promise.race([fontLoader, wait(650)]);
 
   if (token !== introToken) return;
 
